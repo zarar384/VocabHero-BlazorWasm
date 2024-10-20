@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /src/VocabHero/Data/Migrations
 /src/VocabHero/appsettings.json
+/TemplateEngineHost/vs
