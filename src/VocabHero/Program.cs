@@ -1,44 +1,32 @@
+using Carter;
+using FluentValidation;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using VocabHero;
 using VocabHero.Client.Pages;
 using VocabHero.Components;
 using VocabHero.Components.Account;
 using VocabHero.Data;
+using VocabHero.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveWebAssemblyComponents();
+// Application Services
+var assembly = typeof(Program).Assembly;
 
-builder.Services.AddMudServices();
+builder.Services.AddApiServices(builder.Configuration)
+                .AddInfrastructureServices(builder.Configuration)
+                .AddApplicationServices(builder.Configuration)
+                .AddIdentityServices(builder.Configuration)
+                .AddAuthenticationServices()
+                .AddRazorAndMudServices();
 
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<IdentityUserAccessor>();
-builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
+builder.Services.AddValidatorsFromAssembly(assembly);
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
-    .AddIdentityCookies();
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddSignInManager()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
 
@@ -55,6 +43,8 @@ else
     app.UseHsts();
 }
 
+// global custom exception handler
+//builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
@@ -66,5 +56,10 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+app.MapCarter();
+
+// configure the app to use custom exception handler
+app.UseExceptionHandler(options => { });
 
 app.Run();
