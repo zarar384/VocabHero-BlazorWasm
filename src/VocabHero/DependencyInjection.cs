@@ -8,6 +8,7 @@ using VocabHero.Components.Account;
 using VocabHero.Data;
 using VocabHero.Extensions;
 using Microsoft.EntityFrameworkCore;
+using VocabHero.Domain.Entities;
 
 namespace VocabHero
 {
@@ -56,12 +57,12 @@ namespace VocabHero
 
         public static IServiceCollection AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            services.AddScoped<IEmailSender<User>, IdentityNoOpEmailSender>();
             return services;
         }
 
