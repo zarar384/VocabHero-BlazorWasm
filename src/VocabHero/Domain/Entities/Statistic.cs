@@ -2,7 +2,7 @@
 
 namespace VocabHero.Domain.Entities
 {
-    public class Statistics : Entity<int>
+    public class Statistic : Entity<int>
     {
         public int TotalWordsLearned { get; set; }
         public int TotalQuizzesTaken { get; set; }
