@@ -9,6 +9,9 @@ using VocabHero.Data;
 using VocabHero.Extensions;
 using Microsoft.EntityFrameworkCore;
 using VocabHero.Domain.Entities;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using VocabHero.Data.Repositories;
 
 namespace VocabHero
 {
@@ -36,7 +39,8 @@ namespace VocabHero
             });
 
             //add services to the container.
-            //services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }
@@ -63,10 +67,11 @@ namespace VocabHero
                 .AddDefaultTokenProviders();
 
             services.AddScoped<IEmailSender<User>, IdentityNoOpEmailSender>();
+
             return services;
         }
 
-        public static IServiceCollection AddAuthenticationServices(this IServiceCollection services)
+        public static IServiceCollection AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthorization();
             services.AddAuthentication(options =>
@@ -74,7 +79,15 @@ namespace VocabHero
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
                 options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
             })
-            .AddIdentityCookies();
+            .AddJwtBearer(options=>
+            {
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateLifetime = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]!))
+                };
+            });
 
             return services;
         }

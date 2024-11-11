@@ -21,7 +21,7 @@ builder.Services.AddApiServices(builder.Configuration)
                 .AddInfrastructureServices(builder.Configuration)
                 .AddApplicationServices(builder.Configuration)
                 .AddIdentityServices(builder.Configuration)
-                .AddAuthenticationServices()
+                .AddAuthenticationServices(builder.Configuration)
                 .AddRazorAndMudServices();
 
 builder.Services.AddValidatorsFromAssembly(assembly);
